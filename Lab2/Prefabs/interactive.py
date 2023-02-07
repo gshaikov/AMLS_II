@@ -1,13 +1,15 @@
 # Interactive Class.
 
-from Prefabs import prefab
 from abc import abstractmethod
+
+from Prefabs import prefab
 
 
 class Interactive(prefab.Prefab):
     """
     Anything that can be Touch, Move, Eat.
     """
+
     def __init__(self, color):
         super().__init__(color)
 
@@ -19,17 +21,17 @@ class Interactive(prefab.Prefab):
         Args:
             env (game object) - the reference to the game object.
         """
-        pass 
+        pass
 
     @abstractmethod
     def consume(self, env):
         """
         What will happend if the player decides to consum the block ?
-        
+
         Args:
             env (game object) - the reference to the game object.
         """
-        pass 
+        pass
 
 
 class Touchable(Interactive):
@@ -67,4 +69,3 @@ class GoldObj(Interactive):
 
     def consume(self, env):
         print("Consumed")
-

@@ -1,9 +1,10 @@
 # Build a game representation from ascii art defined by user.
-from Prefabs import exceptions, player
 import itertools
 from copy import deepcopy
+
 import game
 import numpy as np
+from Prefabs import exceptions, player
 
 
 class AsciiMapException(Exception):
@@ -68,7 +69,7 @@ def build_game(ascii_art, objs_info, obj_size):
 
     # Get all the objects
     all_obs = list(set(itertools.chain.from_iterable(ascii_art)))
-    all_obs = [o for o in all_obs if not o == ' ']
+    all_obs = [o for o in all_obs if not o == " "]
 
     if len(all_obs) < len(objs_info.keys()):
         raise ObjectInfoException("Some of the objects are not in the map.")
@@ -86,7 +87,7 @@ def build_game(ascii_art, objs_info, obj_size):
 
     for y, row in enumerate(ascii_art):
         for x, obj in enumerate(row):
-            if obj != ' ':
+            if obj != " ":
                 obj_created = deepcopy(objs_info[obj])
                 obj_created.location = (x, y)
                 obj_created.size = obj_size
@@ -97,7 +98,7 @@ def build_game(ascii_art, objs_info, obj_size):
     return game_obj
 
 
-def build_random_game(grid_size, objs_info, obj_size, number_objs = 1):
+def build_random_game(grid_size, objs_info, obj_size, number_objs=1):
     """
     Create the game object from ascii art and objects_information by
     creating difference layers, and pass it to the initilizer.
@@ -147,13 +148,22 @@ def build_random_game(grid_size, objs_info, obj_size, number_objs = 1):
         raise ObjectInfoException("The object information is empty.")
 
     walls = []
-    walls.extend(zip([0]*grid_size,range(grid_size))) # upper wall
-    walls.extend(zip(range(1,grid_size-1), [0]*(grid_size-1))) # lower wall
-    walls.extend(zip(range(1,grid_size-1), [grid_size-1]*(grid_size-1))) # left wall
-    walls.extend(zip([grid_size-1]*grid_size,range(grid_size))) # right wall
+    walls.extend(zip([0] * grid_size, range(grid_size)))  # upper wall
+    walls.extend(zip(range(1, grid_size - 1), [0] * (grid_size - 1)))  # lower wall
+    walls.extend(
+        zip(range(1, grid_size - 1), [grid_size - 1] * (grid_size - 1))
+    )  # left wall
+    walls.extend(zip([grid_size - 1] * grid_size, range(grid_size)))  # right wall
 
     map_size = (grid_size, grid_size)
 
-    game_obj = game.Game(None, map_size, walls=walls, grid_size=grid_size, number_objs=number_objs,
-                 obj_size=obj_size, objs_info=objs_info)
+    game_obj = game.Game(
+        None,
+        map_size,
+        walls=walls,
+        grid_size=grid_size,
+        number_objs=number_objs,
+        obj_size=obj_size,
+        objs_info=objs_info,
+    )
     return game_obj

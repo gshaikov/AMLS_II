@@ -1,10 +1,11 @@
 # This file contain the defintion of the game class.
 
-import numpy as np
-import matplotlib.pyplot as plt
-from Prefabs import exceptions, player, static, interactive
-import warnings
 import copy
+import warnings
+
+import matplotlib.pyplot as plt
+import numpy as np
+from Prefabs import exceptions, interactive, player, static
 
 
 class Game(object):
@@ -15,8 +16,17 @@ class Game(object):
         objs_lookup (dict) - Getting the object based on the location.
         map_size (2 element tuple) - the size of the map (w x h)
     """
-    def __init__(self, objs_lookup, map_size, walls=None, grid_size=None, number_objs=None,
-                 obj_size=None, objs_info=None):
+
+    def __init__(
+        self,
+        objs_lookup,
+        map_size,
+        walls=None,
+        grid_size=None,
+        number_objs=None,
+        obj_size=None,
+        objs_info=None,
+    ):
         if objs_lookup is not None:
             self.objs_lookup = objs_lookup
             self.random_init = False
@@ -45,8 +55,8 @@ class Game(object):
 
         # For reset the game - safe the start state
         self._start_state = copy.deepcopy(self.objs_lookup)
-        
-        # just to init everything 
+
+        # just to init everything
         self._list_players = self.get_list_players()
 
         self._MAX_STEPS = 100
@@ -63,7 +73,7 @@ class Game(object):
         #
         # if objs_new != all_objs_new:
         #     exceptions.ObjectMissingException("There is some object missing!!")
-        
+
         self._objs_lookup = value
 
     def build_objs_lookup(self):
@@ -96,20 +106,20 @@ class Game(object):
         objs_lookup = dict()
 
         for o in self.walls:
-            obj = '#'
+            obj = "#"
             obj_created = copy.deepcopy(self.objs_info[obj])
             obj_created.location = o
             obj_created.size = self.obj_size
             objs_lookup[o] = [obj_created]
 
         for o in objects:
-            obj = 'I'
+            obj = "I"
             obj_created = copy.deepcopy(self.objs_info[obj])
             obj_created.location = o
             obj_created.size = self.obj_size
             objs_lookup[o] = [obj_created]
 
-        obj = 'P'
+        obj = "P"
         obj_created = copy.deepcopy(self.objs_info[obj])
         obj_created.location = player
         obj_created.size = self.obj_size
@@ -119,21 +129,21 @@ class Game(object):
 
     def get_list_players(self):
         """Return list of players, guaruntee that I will not be None"""
-        
+
         players = []
         for key, value in self.objs_lookup.items():
-            for v in value: 
+            for v in value:
                 if isinstance(v, player.Player):
                     players.append(v)
 
         if len(players) == 0:
             warnings.warn("There is no player in the game. You can't call step method")
-        
+
         for p in players:
             p.game = self
 
         return players
- 
+
     @property
     def reward(self):
         """The reward of the player right now"""
@@ -143,12 +153,12 @@ class Game(object):
     def reward(self, value):
         """Setting up the reward"""
 
-        # Check for the conditions 
+        # Check for the conditions
         if not isinstance(value, int) and not isinstance(value, float):
             raise TypeError("The reward should be int, or float")
 
         self._reward = value
-    
+
     @property
     def terminate(self):
         return self._terminate
@@ -164,7 +174,7 @@ class Game(object):
         When we call this function add the total reward by the ammount
 
         Args:
-            1. amount (int) - the amount of the reward we have to add 
+            1. amount (int) - the amount of the reward we have to add
 
         Raises:
             TypeError - if the amount is not int or float.
@@ -176,7 +186,7 @@ class Game(object):
         Just mark the enviroment as termianted.
         """
         self.terminate = True
-    
+
     def step(self, action):
         """
         Given an action what should we do ?
@@ -194,9 +204,11 @@ class Game(object):
             raise exceptions.EnvTerminateException("The env is terminated.")
 
         if len(self._list_players) > 1:
-            warnings.warn("There is more than one player - \
-                            Not supporting right now, might causes unwanted behavior.")
-        # Everytime the step is called we are going to reset the reward 
+            warnings.warn(
+                "There is more than one player - \
+                            Not supporting right now, might causes unwanted behavior."
+            )
+        # Everytime the step is called we are going to reset the reward
         self.reward = 0
 
         self.steps_taken += 1
@@ -208,17 +220,21 @@ class Game(object):
         if self.steps_taken >= self._MAX_STEPS:
             self.terminate_env()
 
-        rendered_map = self.render_map().sum(axis=2) / 3.
-        return np.reshape(rendered_map, [rendered_map.shape[0], rendered_map.shape[1], 1]), self.reward, self.terminate
-    
+        rendered_map = self.render_map().sum(axis=2) / 3.0
+        return (
+            np.reshape(rendered_map, [rendered_map.shape[0], rendered_map.shape[1], 1]),
+            self.reward,
+            self.terminate,
+        )
+
     def _change_player_pos(self, player_location, next_location):
         """
         This will change the position of the player no matter what
 
         Args:
-            1. player_location (2 element tuple) - 
+            1. player_location (2 element tuple) -
                 the current location of the player
-            2. next_location (2 element tuple) - 
+            2. next_location (2 element tuple) -
                 the new location of the player.
         """
         # We have to check that there aren't any overlap player
@@ -229,11 +245,11 @@ class Game(object):
             self.objs_lookup[next_location] = player_obj
 
         else:
-            # If there are more than one objects in the current location 
-            # Then we have to remore the last one which is the player. 
+            # If there are more than one objects in the current location
+            # Then we have to remore the last one which is the player.
             player_obj = self.objs_lookup[player_location].pop()
             self.objs_lookup[next_location] = [player_obj]
-            
+
         # Change it to the next location.
 
     def _move_player(self, player_location, next_location):
@@ -252,36 +268,34 @@ class Game(object):
         """
 
         location = player_location
-        
+
         # Update the lookup table.
         # If there is nothing, then proceed the move.
         if not next_location in self.objs_lookup:
-            self._change_player_pos(player_location, next_location) 
-            location = next_location 
+            self._change_player_pos(player_location, next_location)
+            location = next_location
         else:
             # If next is the static - then you can't move.
 
             # Warning - we will accessing just the first element.
-            if isinstance(self.objs_lookup[next_location][0],
-                                    static.Static):
+            if isinstance(self.objs_lookup[next_location][0], static.Static):
                 next_object = self.objs_lookup[next_location][0]
                 next_object.touch(self)
             else:
-
                 # get the content
                 player_obj = self.objs_lookup.pop(player_location)[0]
-                
+
                 next_object = self.objs_lookup[next_location][0]
 
-                # just in case 
+                # just in case
                 if isinstance(next_object, interactive.Interactive):
                     next_object.touch(self)
 
                 content = self.objs_lookup[next_location]
-                content.append(player_obj)  
-                
+                content.append(player_obj)
+
                 location = next_location
-                
+
         return location
 
     def move_north(self, player_location):
@@ -297,7 +311,7 @@ class Game(object):
             1. player_new_location (tuple of 2 elements) -
                 the location of the player after it moves upward.
         """
-        next_possible_location = (player_location[0], player_location[1]-1)
+        next_possible_location = (player_location[0], player_location[1] - 1)
         return self._move_player(player_location, next_possible_location)
 
     def move_east(self, player_location):
@@ -314,7 +328,7 @@ class Game(object):
                 the location of the player after it moves upward.
         """
 
-        next_possible_location = (player_location[0]+1, player_location[1])
+        next_possible_location = (player_location[0] + 1, player_location[1])
 
         return self._move_player(player_location, next_possible_location)
 
@@ -332,7 +346,7 @@ class Game(object):
                 the location of the player after it moves upward.
         """
 
-        next_possible_location = (player_location[0], player_location[1]+1)
+        next_possible_location = (player_location[0], player_location[1] + 1)
         return self._move_player(player_location, next_possible_location)
 
     def move_west(self, player_location):
@@ -348,7 +362,7 @@ class Game(object):
             1. player_new_location (tuple of 2 elements) -
                 the location of the player after it moves upward.
         """
-        next_possible_location = (player_location[0]-1, player_location[1])
+        next_possible_location = (player_location[0] - 1, player_location[1])
         return self._move_player(player_location, next_possible_location)
 
     def render_map(self):
@@ -366,15 +380,16 @@ class Game(object):
             for y in range(size_y):
                 if (x, y) in self.objs_lookup:
                     # Since we store it in list. So display the first object first.
-                    row.append(self.objs_lookup[(x,y)][0].numpy_tile)
+                    row.append(self.objs_lookup[(x, y)][0].numpy_tile)
                 else:
                     row.append(self.empty_tile_numpy)
             # Have to reverse for the reshape to work.
             map_array.append(np.hstack(row))
 
         # Have to reverse for the reshape to work.
-        image = np.array(map_array).reshape(size_x * self._obj_size,
-                                                size_y * self._obj_size, 3)
+        image = np.array(map_array).reshape(
+            size_x * self._obj_size, size_y * self._obj_size, 3
+        )
 
         assert all(len(map_array[0]) == len(r) for r in map_array)
 
@@ -391,10 +406,10 @@ class Game(object):
     def reset(self):
         """
         Reset Everything.
-        
+
         Return:
             The first scene
-        
+
         Warns:
             If the game is not terminated, we shoud warn the user, first
         """
@@ -411,5 +426,7 @@ class Game(object):
         self.steps_taken = 0
         self._list_players = self.get_list_players()
 
-        rendered_map = self.render_map().sum(axis=2) / 3.
-        return np.reshape(rendered_map, [rendered_map.shape[0], rendered_map.shape[1], 1])
+        rendered_map = self.render_map().sum(axis=2) / 3.0
+        return np.reshape(
+            rendered_map, [rendered_map.shape[0], rendered_map.shape[1], 1]
+        )

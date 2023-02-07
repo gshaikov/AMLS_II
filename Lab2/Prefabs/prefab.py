@@ -1,10 +1,11 @@
 # Base Case for the prefab objects in the game
 
 from abc import ABC, abstractmethod
-import numpy as np
 
 import matplotlib.pyplot as plt
+import numpy as np
 from Prefabs import exceptions
+
 
 class Prefab(ABC):
     """
@@ -26,6 +27,7 @@ class Prefab(ABC):
         exceptions.NotInitalizedException-
             When we try to access the location without initalized it first.
     """
+
     def __init__(self, color):
         self.color = color
 
@@ -43,7 +45,7 @@ class Prefab(ABC):
         """
         if self._location is None:
             raise exceptions.NotInitalizedException("Location haven't been initilized")
-        
+
         return self._location
 
     @location.setter
@@ -62,17 +64,18 @@ class Prefab(ABC):
 
         # Similar to prefab
         if not isinstance(value, tuple):
-            raise TypeError("Expect 2 elements tuple - got " +
-                                    value.__class__.__name__)
+            raise TypeError("Expect 2 elements tuple - got " + value.__class__.__name__)
         else:
             if len(value) != 2:
-                raise TypeError("Expect 2 elements tuple - got " +
-                                    str(len(value)) + " elements tuple.")
+                raise TypeError(
+                    "Expect 2 elements tuple - got "
+                    + str(len(value))
+                    + " elements tuple."
+                )
             elif not all(isinstance(c, int) for c in value):
                 raise TypeError("Expect 2 elements tuple of type int")
-        
-        self._location = value
 
+        self._location = value
 
     @property
     def color(self):
@@ -97,19 +100,20 @@ class Prefab(ABC):
                 If the value is less than 0 or more than 255
         """
         if not isinstance(value, tuple):
-            raise TypeError("Expect 3 elements tuple - got " +
-                                    value.__class__.__name__)
+            raise TypeError("Expect 3 elements tuple - got " + value.__class__.__name__)
         else:
             if len(value) != 3:
-                raise TypeError("Expect 3 elements tuple - got " +
-                                    str(len(value)) + " elements tuple.")
+                raise TypeError(
+                    "Expect 3 elements tuple - got "
+                    + str(len(value))
+                    + " elements tuple."
+                )
 
             elif not all(isinstance(c, int) for c in value):
                 raise TypeError("Expect 3 elements tuple of type int")
 
             elif not all(0 <= c <= 255 for c in value):
                 raise ValueError("Color can't be more than 255 or less than 0")
-
 
         self._color = value
 
@@ -134,8 +138,7 @@ class Prefab(ABC):
         """
 
         if not isinstance(value, int):
-            raise TypeError("Expect size to be int - got " +
-                                value.__class__.__name__)
+            raise TypeError("Expect size to be int - got " + value.__class__.__name__)
         else:
             if value <= 0:
                 raise ValueError("Expect size to be positive int")
@@ -150,9 +153,8 @@ class Prefab(ABC):
         Return:
             numpy tile (size x size x 3 numpy array) - numpy tile
         """
-        one_pixel = np.array([c/255 for c in self.color])
-        tile_pixel = [[one_pixel for _ in range(self.size)]
-                                    for _ in range(self.size)]
+        one_pixel = np.array([c / 255 for c in self.color])
+        tile_pixel = [[one_pixel for _ in range(self.size)] for _ in range(self.size)]
         return np.array(tile_pixel, dtype=np.float32)
 
     def _display_tile(self):
@@ -164,7 +166,7 @@ class Prefab(ABC):
 
     def __eq__(self, other):
         """This is how we compare 2 prefabs together."""
-        return type(other) == type(self) \
-            and other.color == self.color \
-            # and other.location == self.location \
-            # and other.size == self.size
+        return (
+            type(other) == type(self) and other.color == self.color
+        )  # and other.location == self.location \
+        # and other.size == self.size

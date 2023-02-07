@@ -1,18 +1,19 @@
 import os
+
+import cv2
+import dlib
 import numpy as np
 from keras.preprocessing import image
 from keras.utils import img_to_array, load_img
-import cv2
-import dlib
 
 # PATH TO ALL IMAGES
 global basedir, image_paths, target_size
-basedir = './dataset'
-images_dir = os.path.join(basedir,'celeba')
-labels_filename = 'labels.csv'
+basedir = "./dataset"
+images_dir = os.path.join(basedir, "celeba")
+labels_filename = "labels.csv"
 
 detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 
 # how to find frontal human faces in an image using 68 landmarks.  These are points on the face such as the corners of the mouth, along the eyebrows, on the eyes, and so forth.
@@ -41,6 +42,7 @@ def shape_to_np(shape, dtype="int"):
     # return the list of (x, y)-coordinates
     return coords
 
+
 def rect_to_bb(rect):
     # take a bounding predicted by dlib and convert it
     # to the format (x, y, w, h) as we would normally do
@@ -57,10 +59,10 @@ def rect_to_bb(rect):
 def run_dlib_shape(image):
     # in this function we load the image, detect the landmarks of the face, and then return the image and the landmarks
     # load the input image, resize it, and convert it to grayscale
-    resized_image = image.astype('uint8')
+    resized_image = image.astype("uint8")
 
     gray = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
-    gray = gray.astype('uint8')
+    gray = gray.astype("uint8")
 
     # detect faces in the grayscale image
     rects = detector(gray, 1)
@@ -73,7 +75,7 @@ def run_dlib_shape(image):
     face_shapes = np.zeros((136, num_faces), dtype=np.int64)
 
     # loop over the face detections
-    for (i, rect) in enumerate(rects):
+    for i, rect in enumerate(rects):
         # determine the facial landmarks for the face region, then
         # convert the facial landmark (x, y)-coordinates to a NumPy
         # array
@@ -91,6 +93,7 @@ def run_dlib_shape(image):
 
     return dlibout, resized_image
 
+
 def extract_features_labels():
     """
     This funtion extracts the landmarks features for all images in the folder 'dataset/celeba'.
@@ -102,26 +105,26 @@ def extract_features_labels():
     """
     image_paths = [os.path.join(images_dir, l) for l in os.listdir(images_dir)]
     target_size = None
-    labels_file = open(os.path.join(basedir, labels_filename), 'r')
+    labels_file = open(os.path.join(basedir, labels_filename), "r")
     lines = labels_file.readlines()
-    gender_labels = {line.split(',')[0] : int(line.split(',')[6]) for line in lines[2:]}
+    gender_labels = {line.split(",")[0]: int(line.split(",")[6]) for line in lines[2:]}
     if os.path.isdir(images_dir):
         all_features = []
         all_labels = []
         for img_path in image_paths:
-            file_name= img_path.split('.')[1].split('/')[-1]
+            file_name = img_path.split(".")[1].split("/")[-1]
             # file_name= img_path.split('.')[1].split('\\')[-1] # if using windows use this line
             # load image
             img = img_to_array(
-                load_img(img_path,
-                               target_size=target_size,
-                               interpolation='bicubic'))
+                load_img(img_path, target_size=target_size, interpolation="bicubic")
+            )
             features, _ = run_dlib_shape(img)
             if features is not None:
                 all_features.append(features)
                 all_labels.append(gender_labels[file_name])
 
     landmark_features = np.array(all_features)
-    gender_labels = (np.array(all_labels) + 1)/2 # simply converts the -1 into 0, so male=0 and female=1
+    gender_labels = (
+        np.array(all_labels) + 1
+    ) / 2  # simply converts the -1 into 0, so male=0 and female=1
     return landmark_features, gender_labels
-

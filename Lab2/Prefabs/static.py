@@ -1,13 +1,15 @@
 # Just an nothing object, that can't walk path.
 
-from Prefabs import prefab
 from abc import abstractmethod
+
+from Prefabs import prefab
 
 
 class Static(prefab.Prefab):
     """
     Static Prefab - Anything that can't be moved, or interact.
     """
+
     def __init__(self, color):
         super().__init__(color)
 
